@@ -6,6 +6,10 @@ function UserForm({ errors, touched, values }) {
   return (
     <Form>
       <div>
+        {touched.name && errors.name && <p>{errors.name}</p>}
+        <Field type="name" name="name" placeholder="Name"/>
+      </div>  
+      <div>
         {touched.email && errors.email && <p>{errors.email}</p>}
         <Field type="email" name="email" placeholder="Email"/>
       </div>   
@@ -13,25 +17,20 @@ function UserForm({ errors, touched, values }) {
         {touched.password && errors.password && <p>{errors.password}</p>}
         <Field type="password" name="password" placeholder="Password"/>
       </div>
-      <Field component="select" name="occupation">
-        <option value="software-engineer">Software Engineer</option>
-        <option value="backend-enginer">Backend Engineer</option>
-        <option value="frontend-engineer">Frontend Engineer</option>
-      </Field>
       <Field type="checkbox" name="tos" checked={values.tos} />
-      Accept TOS
+      Accept TOS <br />
       <button>Submit!</button>
     </Form>
   )
 }
 
 const FormikUserForm = withFormik({
-  mapPropsToValues({ email, password, tos, occupation }) {
+  mapPropsToValues({ email, password, tos, name }) {
     return {
+      name: name || "",
       email: email || "",
       password: password || "",
-      tos: tos || false,
-      occupation: occupation || "software-engineer"
+      tos: tos || false
     };
   },
 
