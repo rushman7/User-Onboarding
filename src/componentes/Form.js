@@ -1,71 +1,87 @@
 import React, { useState, useEffect } from 'react';
 import { withFormik, Form, Field } from "formik";
+import User from './User';
 import * as Yup from "yup";
 import axios from 'axios';
 
-function UserForm({ errors, touched, values, isSubmitting }) {
+function UserForm({ errors, touched, values, isSubmitting, status }) {
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
     const getUsers = () => {
+      if (status) {
+        setUsers(users => [...users, status]);
+      } else {
       axios
-        .get('https://reqres.in/api/users')
+        .get('https://reqres.in/api/users/')
         .then(response => {
-          setUsers(response.data);
+          setUsers(response.data.data);
         })
         .catch(error => {
           console.error('Server Error', error);
         });
+      }
     }
     
     getUsers()
-  }, [])
+  }, [status])
 
+  console.log(users)
+
+  if (users.length === 0) {
+    return <div>Loading...</div>
+  }
 
   return (
-    <Form>
-      <div>
-        {touched.name && errors.name && <p>{errors.name}</p>}
-        <Field type="name" name="name" placeholder="Name"/>
-      </div>  
-      <div>
-        {touched.email && errors.email && <p>{errors.email}</p>}
-        <Field type="email" name="email" placeholder="Email"/>
-      </div>   
-      <div>
-        {touched.password && errors.password && <p>{errors.password}</p>}
-        <Field type="password" name="password" placeholder="Password"/>
-      </div>
-      <Field type="checkbox" name="tos" checked={values.tos} />
-      Accept TOS <br />
-      <button type="submit" disabled={isSubmitting}>Submit!</button>
-    </Form>
+    <div>
+      <Form>
+        <div>
+          {touched.first_name && errors.first_name && <p className="error">{errors.first_name}</p>}
+          <Field type="first_name" name="first_name" placeholder="First Name"/>
+        </div>  
+        <div>
+          {touched.last_name && errors.last_name && <p className="error">{errors.last_name}</p>}
+          <Field type="last_name" name="last_name" placeholder="Last Name"/>
+        </div>
+        <div>
+          {touched.email && errors.email && <p className="error">{errors.email}</p>}
+          <Field type="email" name="email" placeholder="Email"/>
+        </div>   
+        <div>
+          {touched.tos && errors.tos && <p className="error">{errors.tos}</p>}
+          <Field type="checkbox" name="tos" checked={values.tos} />
+          Accept TOS <br />
+        </div>
+        <button type="submit" disabled={isSubmitting}>Submit!</button>
+      </Form>
+      {users.map((person, index) => <User key={index} user={person}/>)}
+    </div>
   )
 }
 
 const FormikUserForm = withFormik({
-  mapPropsToValues({ email, password, tos, name }) {
+  mapPropsToValues({ email, last_name, tos, first_name }) {
     return {
-      name: name || "",
+      first_name: first_name || "",
       email: email || "",
-      password: password || "",
+      last_name: last_name || "",
       tos: tos || false
-    };
+    }
   },
 
   validationSchema: Yup.object().shape({
-    name: Yup.string().required("Name is required"),
+    first_name: Yup.string().required("First Name is required"),
     email: Yup.string().email("Email not valid").required("Email is required"),
-    password: Yup.string().min(6, "Password must be at least 6 characters").required("Password is required"),
-    tos: Yup.boolean().isValid(true, "Please accept the Terms of Service")
+    last_name: Yup.string().required("Last Name is required"),
+    tos: Yup.boolean().oneOf([true], "Please accept the Terms of Service")
   }),
 
-  handleSubmit(values, { setSubmitting, resetForm }) {
+  handleSubmit(values, { setSubmitting, resetForm, setStatus }) {
     axios
       .post('https://reqres.in/api/users', values)
       .then(res => {
-        console.log(res)
-        resetForm();
+        console.log(res.data)
+        setStatus(res.data);
         setSubmitting(false);
       })
       .catch(err => {
