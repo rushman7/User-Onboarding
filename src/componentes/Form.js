@@ -26,8 +26,6 @@ function UserForm({ errors, touched, values, isSubmitting, status }) {
     getUsers()
   }, [status])
 
-  console.log(users)
-
   if (users.length === 0) {
     return <div>Loading...</div>
   }
@@ -47,6 +45,11 @@ function UserForm({ errors, touched, values, isSubmitting, status }) {
           {touched.email && errors.email && <p className="error">{errors.email}</p>}
           <Field type="email" name="email" placeholder="Email"/>
         </div>   
+        <Field component="select" name="occupation">
+          <option value="software-engineer">Software Engineer</option>
+          <option value="backend-enginer">Backend Engineer</option>
+          <option value="frontend-engineer">Frontend Engineer</option>
+        </Field>
         <div>
           {touched.tos && errors.tos && <p className="error">{errors.tos}</p>}
           <Field type="checkbox" name="tos" checked={values.tos} />
@@ -60,12 +63,13 @@ function UserForm({ errors, touched, values, isSubmitting, status }) {
 }
 
 const FormikUserForm = withFormik({
-  mapPropsToValues({ email, last_name, tos, first_name }) {
+  mapPropsToValues({ email, last_name, tos, first_name, occupation }) {
     return {
       first_name: first_name || "",
       email: email || "",
       last_name: last_name || "",
-      tos: tos || false
+      tos: tos || false,
+      occupation: occupation || "software-engineer"
     }
   },
 
